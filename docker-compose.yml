@@ -1,0 +1,145 @@
+# Docker Compose file for development environment
+# This file orchestrates running your Rails app in a container
+
+# NOTE: Modern Docker Compose doesn't require a version field
+# The syntax is auto-detected
+
+# Services are the containers you want to run
+# Think of each service as a separate application/process
+services:
+  # DATABASE SERVICE
+  # PostgreSQL runs in its own container, separate from Rails
+  # This follows the Single Responsibility Principle - one service, one job
+  db:
+    # Use official PostgreSQL 16 image from Docker Hub
+    # Docker Hub is like RubyGems but for Docker images
+    image: postgres:16
+    
+    # Container name for easy reference
+    container_name: paymentsystem-db
+    
+    # ENVIRONMENT VARIABLES for PostgreSQL
+    # These configure the database when it first starts
+    environment:
+      # The superuser password (never use this in production!)
+      POSTGRES_PASSWORD: password
+      
+      # Create this database automatically on first run
+      # This matches what we'll put in database.yml
+      POSTGRES_DB: paymentsystem_development
+    
+    # VOLUME for database persistence
+    # Critical! Without this, data is lost when container stops
+    volumes:
+      # Named volume stores actual PostgreSQL data
+      - postgres_data:/var/lib/postgresql/data
+    
+    # PORT MAPPING (optional for development)
+    # Allows you to connect from Mac using tools like pgAdmin or Postico
+    ports:
+      - "5432:5432"
+    
+    # HEALTH CHECK
+    # Docker will check if PostgreSQL is ready before starting dependent services
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # WEB SERVICE (Rails Application)
+  # "web" is the name we give to our Rails application service
+  # You can name it anything, but "web" is conventional for web apps
+  web:
+    # BUILD CONFIGURATION
+    # This tells Docker Compose how to build the image
+    build:
+      context: .              # Use current directory as build context
+      dockerfile: Dockerfile   # Use the existing Dockerfile
+    
+    # CONTAINER NAME
+    # Give the running container a friendly name
+    # Without this, Docker generates random names like "paymentsystem_web_1"
+    container_name: paymentsystem-web
+    
+    # PORT MAPPING
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # This maps port 3000 on your Mac to port 3000 in the container
+    # Access your app at: http://localhost:3000
+    ports:
+      - "3000:3000"
+    
+    # SERVICE DEPENDENCIES
+    # This tells Docker Compose to start 'db' before 'web'
+    # The web app needs the database to be running!
+    depends_on:
+      db:
+        condition: service_healthy  # Wait for PostgreSQL health check to pass
+    
+    # VOLUME MOUNTS
+    # This is KEY for development - it connects your code to the container
+    volumes:
+      # Mount current directory (.) to /rails in container
+      # Changes you make on your Mac appear instantly in the container!
+      - .:/rails
+      
+      # Named volume for bundler cache
+      # This persists installed gems across container rebuilds
+      # Without this, you'd reinstall all gems every time!
+      - bundle_cache:/usr/local/bundle
+    
+    # ENVIRONMENT VARIABLES
+    # Override production settings from Dockerfile for development
+    environment:
+      # Run in development mode (not production!)
+      - RAILS_ENV=development
+      
+      # Show logs in terminal (useful for debugging)
+      - RAILS_LOG_TO_STDOUT=true
+      
+      # Development server should listen on all interfaces
+      # (0.0.0.0 allows Docker to forward traffic)
+      - BINDING=0.0.0.0
+      
+      # BUNDLER CONFIGURATION
+      # Override Dockerfile's production bundler settings
+      # In development, we want to allow Gemfile.lock updates
+      - BUNDLE_DEPLOYMENT=0
+      
+      # DATABASE CONNECTION VARIABLES
+      # Rails will use these to connect to PostgreSQL
+      # 'db' is the service name - Docker networking makes this work!
+      - DATABASE_HOST=db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password
+    
+    # COMMAND OVERRIDE
+    # Override the CMD from Dockerfile
+    # This is what actually runs when container starts
+    # 
+    # The command is a single bash script that:
+    # 1. Checks/installs gems if needed
+    # 2. Prepares the database
+    # 3. Starts the Rails server
+    #
+    # Note: We use 'sh -c' with a single string to avoid YAML multiline issues
+    command: sh -c "bundle check || bundle install && bin/rails db:prepare && bin/rails server -b 0.0.0.0 -p 3000"
+    
+    # INTERACTIVE MODE
+    # Allows you to use binding.pry, byebug, etc for debugging
+    stdin_open: true
+    tty: true
+
+# NAMED VOLUMES
+# These are managed by Docker and persist data
+# Think of them as "special folders" that survive container deletion
+volumes:
+  bundle_cache:
+    # This volume stores your installed gems
+    # Makes subsequent starts much faster!
+  
+  postgres_data:
+    # This volume stores PostgreSQL database files
+    # Critical for data persistence across container restarts
+    # Located at: /var/lib/postgresql/data inside the container
+
