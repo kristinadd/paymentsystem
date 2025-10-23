@@ -1,51 +1,44 @@
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+# .dockerignore - tells Docker what NOT to include in the build context
+# This speeds up builds and reduces image size
 
-# Ignore git directory.
-/.git/
-/.gitignore
+# Git files (not needed in container)
+.git
+.gitignore
+.gitattributes
 
-# Ignore bundler config.
-/.bundle
+# Documentation (not needed to run the app)
+README.md
+*.md
 
-# Ignore all environment files.
-/.env*
+# Development/test files
+.env.development
+.env.test
 
-# Ignore all default key files.
-/config/master.key
-/config/credentials/*.key
+# Logs (will be regenerated)
+log/*
+tmp/*
 
-# Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+# Storage (mounted separately as volume)
+storage/*
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/.keep
+# Dependencies (will be installed fresh in container)
+node_modules/
+vendor/bundle/
 
-# Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/.keep
+# Test files (not needed in development container)
+test/
+spec/
 
-# Ignore assets.
-/node_modules/
-/app/assets/builds/*
-!/app/assets/builds/.keep
-/public/assets
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Ignore CI service files.
-/.github
+# OS files
+.DS_Store
+Thumbs.db
 
-# Ignore Kamal files.
-/config/deploy*.yml
-/.kamal
-
-# Ignore development files
-/.devcontainer
-
-# Ignore Docker-related files
-/.dockerignore
-/Dockerfile*
+# Bootsnap cache (will be regenerated)
+tmp/cache/bootsnap*
