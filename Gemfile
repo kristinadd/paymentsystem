@@ -45,6 +45,15 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
+  # RSpec testing framework [https://rspec.info/]
+  gem "rspec-rails", "~> 6.1"
+
+  # Factory Bot for test data [https://github.com/thoughtbot/factory_bot_rails]
+  gem "factory_bot_rails", "~> 6.4"
+
+  # Faker for generating fake data [https://github.com/faker-ruby/faker]
+  gem "faker", "~> 3.2"
+
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false
 
@@ -64,4 +73,10 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Shoulda Matchers for cleaner RSpec tests [https://github.com/thoughtbot/shoulda-matchers]
+  gem "shoulda-matchers", "~> 6.0"
+
+  # Database Cleaner for clean test database state [https://github.com/DatabaseCleaner/database_cleaner]
+  gem "database_cleaner-active_record", "~> 2.1"
 end
