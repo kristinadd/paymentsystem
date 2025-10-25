@@ -10,8 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 0) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_25_174004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "merchants", force: :cascade do |t|
+    t.boolean "active"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "email", null: false
+    t.string "name", null: false
+    t.decimal "total_transaction_sum", precision: 10, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_merchants_on_email", unique: true
+  end
 end
