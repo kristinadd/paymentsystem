@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_25_174004) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_25_185627) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,4 +24,25 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_174004) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_merchants_on_email", unique: true
   end
+
+  create_table "transactions", force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2
+    t.datetime "created_at", null: false
+    t.string "customer_email", null: false
+    t.string "customer_phone"
+    t.bigint "merchant_id", null: false
+    t.bigint "referenced_transaction_id"
+    t.integer "status", null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["merchant_id"], name: "index_transactions_on_merchant_id"
+    t.index ["referenced_transaction_id"], name: "index_transactions_on_referenced_transaction_id"
+    t.index ["status"], name: "index_transactions_on_status"
+    t.index ["type"], name: "index_transactions_on_type"
+    t.index ["uuid"], name: "index_transactions_on_uuid", unique: true
+  end
+
+  add_foreign_key "transactions", "merchants"
+  add_foreign_key "transactions", "transactions", column: "referenced_transaction_id"
 end

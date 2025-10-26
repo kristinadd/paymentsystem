@@ -1,4 +1,6 @@
 class Merchant < ApplicationRecord
+  has_many :transactions, dependent: :restrict_with_error
+
   validates :name, presence: true
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },
