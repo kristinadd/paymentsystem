@@ -17,7 +17,15 @@ class Transaction < ApplicationRecord
     error: 3
   }
 
-  validates :uuid, presence: true, uniqueness: true
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :customer_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validate :merchant_must_be_active
+
+  private
+
+  def merchant_must_be_active
+    if !merchant.active?
+      errors.add(:merchant, "is not active")
+    end
+  end
 end
