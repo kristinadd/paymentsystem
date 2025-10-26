@@ -24,7 +24,7 @@ class Transaction < ApplicationRecord
   private
 
   def merchant_must_be_active
-    if !merchant.active?
+    if merchant&.active? == false
       errors.add(:merchant, "is not active")
     end
   end
