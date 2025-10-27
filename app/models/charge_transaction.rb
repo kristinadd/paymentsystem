@@ -54,7 +54,9 @@ class ChargeTransaction < Transaction
     end
   end
 
-  def update_merchant_total
-    merchant.increment!(:total_transaction_sum, amount)
+  def process_approved_charge
+    ApplicationRecord.transaction do
+      merchant.increment!(:total_transaction_sum, amount)
+    end
   end
 end

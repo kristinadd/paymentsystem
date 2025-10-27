@@ -9,8 +9,7 @@ class RefundTransaction < Transaction
   before_validation :set_default_status, on: :create
   before_validation :check_referenced_transaction_status
 
-  after_commit :update_charge_status, if: -> { saved_change_to_status? && approved? }
-  after_commit :update_merchant_total, if: -> { saved_change_to_status? && approved? }
+  after_commit :process_approved_refund, if: -> { saved_change_to_status? && approved? }
 
   private
 
@@ -55,11 +54,10 @@ class RefundTransaction < Transaction
     end
   end
 
-  def update_charge_status
-    referenced_transaction.update!(status: :refunded)
-  end
-
-  def update_merchant_total
-    merchant.increment!(:total_transaction_sum, -amount)
+  def process_approved_refund
+    ApplicationRecord.transaction do
+      referenced_transaction.update!(status: :refunded)
+      merchant.increment!(:total_transaction_sum, -amount)
+    end
   end
 end
