@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_27_142553) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_27_155243) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -40,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_27_142553) do
     t.index ["merchant_id"], name: "index_transactions_on_merchant_id"
     t.index ["referenced_transaction_id", "type"], name: "index_unique_charge_per_authorize", unique: true, where: "((type)::text = 'ChargeTransaction'::text)"
     t.index ["referenced_transaction_id", "type"], name: "index_unique_refund_per_charge", unique: true, where: "((type)::text = 'RefundTransaction'::text)"
+    t.index ["referenced_transaction_id", "type"], name: "index_unique_reversal_per_authorize", unique: true, where: "((type)::text = 'ReversalTransaction'::text)"
     t.index ["referenced_transaction_id"], name: "index_transactions_on_referenced_transaction_id"
     t.index ["status"], name: "index_transactions_on_status"
     t.index ["type"], name: "index_transactions_on_type"

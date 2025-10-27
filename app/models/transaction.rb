@@ -17,11 +17,15 @@ class Transaction < ApplicationRecord
     error: 3
   }
 
-  validates :amount, presence: true, numericality: { greater_than: 0 }
+  validates :amount, presence: true, numericality: { greater_than: 0 }, unless: :reversal_transaction?
   validates :customer_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :merchant_must_be_active
 
   private
+
+  def reversal_transaction?
+    type == "ReversalTransaction"
+  end
 
   def merchant_must_be_active
     if merchant&.active? == false
