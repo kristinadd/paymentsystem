@@ -23,6 +23,7 @@ class RefundTransaction < Transaction
 
     unless referenced_transaction.approved?
       self.status = :error
+      errors.add(:referenced_transaction, "must be an approved transaction")
     end
   end
 

@@ -51,9 +51,10 @@ RSpec.describe RefundTransaction, type: :model do
     context "charge status" do
       it "sets status to error when charge is not approved" do
         refund = build(:refund_transaction, :with_error_charge)
-        refund.valid?
 
+        expect(refund).not_to be_valid
         expect(refund.status).to eq("error")
+        expect(refund.errors[:referenced_transaction]).to include("must be an approved transaction")
       end
 
       it "keeps approved status when charge is approved" do
@@ -68,9 +69,10 @@ RSpec.describe RefundTransaction, type: :model do
         charge = create(:charge_transaction, status: :approved)
         charge.update_column(:status, Transaction.statuses[:error])
         refund = build(:refund_transaction, referenced_transaction: charge, create_charge: false, amount: charge.amount, status: :approved)
-        refund.valid?
 
+        expect(refund).not_to be_valid
         expect(refund.status).to eq("error")
+        expect(refund.errors[:referenced_transaction]).to include("must be an approved transaction")
       end
     end
 
@@ -86,10 +88,10 @@ RSpec.describe RefundTransaction, type: :model do
 
         # Try to create second refund - charge is now "refunded"
         refund2 = build(:refund_transaction, referenced_transaction: charge, create_charge: false, amount: charge.amount)
-        refund2.valid?
 
-        # Status should be set to error because charge is no longer approved
-        expect(refund2.status).to eq("error")
+        # Should be invalid with clear error message
+        expect(refund2).not_to be_valid
+        expect(refund2.errors[:referenced_transaction]).to include("must be an approved transaction")
       end
     end
   end
