@@ -66,7 +66,7 @@ RSpec.describe RefundTransaction, type: :model do
 
       it "sets status to error when charge has error status" do
         charge = create(:charge_transaction, status: :approved)
-        charge.update_column(:status, 3) # error status
+        charge.update_column(:status, Transaction.statuses[:error])
         refund = build(:refund_transaction, referenced_transaction: charge, create_charge: false, amount: charge.amount, status: :approved)
         refund.valid?
 
