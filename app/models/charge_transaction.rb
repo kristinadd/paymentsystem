@@ -9,7 +9,7 @@ class ChargeTransaction < Transaction
   before_validation :set_default_status, on: :create
   before_validation :check_referenced_transaction_status
 
-  after_commit :update_merchant_total, if: -> { saved_change_to_status? && approved? }
+  after_commit :process_approved_charge, if: -> { saved_change_to_status? && approved? }
 
   private
 
@@ -23,6 +23,7 @@ class ChargeTransaction < Transaction
 
     unless referenced_transaction.approved? || referenced_transaction.refunded?
       self.status = :error
+      errors.add(:referenced_transaction, "must be an approved or refunded transaction")
     end
   end
 
@@ -54,7 +55,9 @@ class ChargeTransaction < Transaction
     end
   end
 
-  def update_merchant_total
-    merchant.increment!(:total_transaction_sum, amount)
+  def process_approved_charge
+    ApplicationRecord.transaction do
+      merchant.increment!(:total_transaction_sum, amount)
+    end
   end
 end
