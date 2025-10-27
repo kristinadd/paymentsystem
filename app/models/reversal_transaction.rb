@@ -8,6 +8,7 @@ class ReversalTransaction < Transaction
 
   before_validation :set_default_status, on: :create
   before_validation :check_referenced_transaction_status
+  before_validation :lock_referenced_transaction, if: -> { referenced_transaction.present? }
 
   after_commit :process_approved_reversal, if: -> { saved_change_to_status? && approved? }
 
@@ -63,5 +64,9 @@ class ReversalTransaction < Transaction
     ApplicationRecord.transaction do
       referenced_transaction.update!(status: :reversed)
     end
+  end
+
+  def lock_referenced_transaction
+    referenced_transaction.lock!
   end
 end
