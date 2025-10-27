@@ -70,7 +70,7 @@ RSpec.describe ChargeTransaction, type: :model do
       expect(charge).not_to be_valid
       expect(charge.status).to eq("error")
       expect(charge.errors[:referenced_transaction]).to include("must be an approved or refunded transaction")
-      
+
       # Merchant total should not change
       expect(merchant.reload.total_transaction_sum).to eq(0)
     end
