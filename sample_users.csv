@@ -1,0 +1,6 @@
+name,email,role
+John Admin,john.admin@example.com,admin
+Jane Merchant,jane.merchant@example.com,merchant
+Bob Store,bob.store@example.com,merchant
+Alice Admin,alice.admin@example.com,admin
+Charlie Shop,charlie.shop@example.com,merchant
