@@ -56,6 +56,7 @@ services:
     build:
       context: .              # Use current directory as build context
       dockerfile: Dockerfile   # Use the existing Dockerfile
+      target: build            # Use the 'build' stage which has build tools
     
     # CONTAINER NAME
     # Give the running container a friendly name
@@ -118,7 +119,7 @@ services:
     # This is what actually runs when container starts
     # 
     # The command is a single bash script that:
-    # 1. Checks/installs gems if needed
+    # 1. Checks/installs gems if needed (handles Gemfile.lock changes)
     # 2. Prepares the database
     # 3. Starts the Rails server
     #
