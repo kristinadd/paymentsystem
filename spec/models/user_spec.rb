@@ -17,6 +17,11 @@ RSpec.describe User, type: :model do
     end
 
     context "when role is admin" do
+      it "is valid without merchant" do
+        user = build(:user, :admin)
+        expect(user).to be_valid
+      end
+
       it "cannot have a merchant" do
         user = create(:user, :admin)
         merchant = build(:merchant, user: user)
@@ -24,11 +29,6 @@ RSpec.describe User, type: :model do
 
         expect(user).not_to be_valid
         expect(user.errors[:merchant]).to include("must be blank for admin role")
-      end
-
-      it "is valid without merchant" do
-        user = build(:user, :admin)
-        expect(user).to be_valid
       end
     end
   end
