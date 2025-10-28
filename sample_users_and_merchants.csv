@@ -1,0 +1,6 @@
+name,email,role,merchant_name,merchant_email,merchant_description
+John Admin,john.admin@example.com,admin
+Jane Merchant,jane.merchant@example.com,merchant,Jane's Coffee Shop,coffee@example.com,Premium coffee and pastries
+Bob Store,bob.store@example.com,merchant,Bob's Electronics,electronics@example.com,Consumer electronics and gadgets
+Alice Admin,alice.admin@example.com,admin
+Charlie Shop,charlie.shop@example.com,merchant,Charlie's Bookstore,books@example.com,New and used books
