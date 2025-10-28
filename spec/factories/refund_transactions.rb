@@ -11,6 +11,12 @@ FactoryBot.define do
     end
 
     after(:build) do |refund, evaluator|
+      # Ensure merchant is persisted before creating related transactions
+      unless refund.merchant.persisted?
+        refund.merchant.user&.save!(validate: false)
+        refund.merchant.save!
+      end
+
       if evaluator.create_charge && refund.referenced_transaction.nil?
         # Create the full chain: Authorize → Charge
         authorize = create(
@@ -35,6 +41,11 @@ FactoryBot.define do
 
     trait :with_error_charge do
       after(:build) do |refund|
+        unless refund.merchant.persisted?
+          refund.merchant.user&.save!(validate: false)
+          refund.merchant.save!
+        end
+
         authorize = create(
           :authorize_transaction,
           merchant: refund.merchant,

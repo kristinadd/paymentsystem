@@ -11,6 +11,12 @@ FactoryBot.define do
     end
 
     after(:build) do |reversal, evaluator|
+      # Ensure merchant is persisted before creating related transactions
+      unless reversal.merchant.persisted?
+        reversal.merchant.user&.save!(validate: false)
+        reversal.merchant.save!
+      end
+
       if evaluator.create_authorize && reversal.referenced_transaction.nil?
         reversal.referenced_transaction = create(
           :authorize_transaction,
@@ -23,6 +29,11 @@ FactoryBot.define do
 
     trait :with_charged_authorize do
       after(:build) do |reversal|
+        unless reversal.merchant.persisted?
+          reversal.merchant.user&.save!(validate: false)
+          reversal.merchant.save!
+        end
+
         authorize = create(
           :authorize_transaction,
           merchant: reversal.merchant,

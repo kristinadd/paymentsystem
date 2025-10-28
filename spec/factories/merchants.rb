@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :merchant do
+    association :user, role: :merchant
+
     sequence(:name) { |n| "Merchant #{n}" }
     sequence(:email) { |n| "merchant#{n}@example.com" }
 
