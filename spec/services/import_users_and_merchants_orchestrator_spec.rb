@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe CsvImportOrchestrator, type: :service do
+RSpec.describe ImportUsersAndMerchantsOrchestrator, type: :service do
   let(:valid_csv_path) { Rails.root.join('spec', 'fixtures', 'files', 'valid_users.csv') }
   let(:invalid_csv_path) { Rails.root.join('spec', 'fixtures', 'files', 'invalid_users.csv') }
   let(:missing_csv_path) { Rails.root.join('spec', 'fixtures', 'files', 'missing.csv') }

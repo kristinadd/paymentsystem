@@ -1,6 +1,6 @@
 require "csv"
 
-class CsvImportOrchestrator
+class ImportUsersAndMerchantsOrchestrator
   attr_reader :file_path, :results
 
   def initialize(file_path)
