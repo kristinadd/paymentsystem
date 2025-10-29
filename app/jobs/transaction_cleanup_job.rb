@@ -13,4 +13,3 @@ class TransactionCleanupJob < ApplicationJob
     total_deleted
   end
 end
-
