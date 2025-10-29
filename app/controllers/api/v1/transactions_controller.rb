@@ -17,15 +17,7 @@ module Api
         external_params = permitted_params
         internal_params = transform_params(external_params)
 
-        transaction = TransactionFactory.create(
-          type: internal_params[:type],
-          merchant_id: internal_params[:merchant_id],
-          referenced_transaction_id: internal_params[:referenced_transaction_id],
-          amount: internal_params[:amount],
-          status: internal_params[:status],
-          customer_email: internal_params[:customer_email],
-          customer_phone: internal_params[:customer_phone]
-        )
+        transaction = TransactionFactory.create(**internal_params)
 
         render json: {
           data: TransactionSerializer.new(transaction).as_json
