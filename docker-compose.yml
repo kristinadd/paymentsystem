@@ -151,6 +151,40 @@ services:
     stdin_open: true
     tty: true
 
+  # SIDEKIQ WORKER SERVICE
+  # Background job processor - runs scheduled jobs and queued jobs
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    
+    container_name: paymentsystem-sidekiq
+    
+    # Run Sidekiq worker process
+    command: bundle exec sidekiq
+    
+    # Same dependencies as web service
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    # Mount code and gems (same as web service)
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    
+    # Same environment as web service
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_HOST=db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password
+      - BUNDLE_DEPLOYMENT=0
+
 # NAMED VOLUMES
 # These are managed by Docker and persist data
 # Think of them as "special folders" that survive container deletion
