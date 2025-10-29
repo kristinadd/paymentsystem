@@ -1,7 +1,6 @@
 namespace :transactions do
   desc "Delete transactions older than 1 hour"
   task cleanup: :environment do
-
     old_transactions = Transaction.where("created_at < ?", 1.hour.ago)
     count = old_transactions.count
 
