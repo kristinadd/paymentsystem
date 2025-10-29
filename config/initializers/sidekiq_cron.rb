@@ -5,7 +5,8 @@ if defined?(Sidekiq::CLI) || Rails.env.production?
     Sidekiq::Cron::Job.create(
       name: "Delete old transactions",
       cron: "0 * * * *",  # Every hour at minute 0
-      class: "TransactionCleanupJob"
+      class: "TransactionCleanupJob",
+      active_job: true  # Required for ActiveJob classes
     )
   end
 end
