@@ -38,9 +38,7 @@ class ImportUsersAndMerchantsOrchestrator
     return "No errors! 🎉" if results[:errors].empty?
 
     report = "Errors:\n"
-    results[:errors].each_with_index do |error, index|
-      report += "#{index + 1}. #{error}\n"
-    end
+    report << results[:errors].map.with_index(1) { |error, i| "#{i}. #{error}" }.join("\n")
     report
   end
 
@@ -57,7 +55,7 @@ class ImportUsersAndMerchantsOrchestrator
     end
   rescue ArgumentError => e
     # CSV structure error - stop processing
-    results[:errors] << "CSV structure error at line #{line_number}: #{e.message}"
+    results[:errors] << "CSV structure error: #{e.message}"
     raise
   end
 
@@ -97,7 +95,7 @@ class ImportUsersAndMerchantsOrchestrator
   end
 
   def merchant_role?(row)
-    row["role"] == "merchant"
+    row["role"]&.strip&.downcase == "merchant"
   end
 
   def has_merchant_data?(row)
