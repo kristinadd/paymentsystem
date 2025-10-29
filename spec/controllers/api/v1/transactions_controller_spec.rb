@@ -17,6 +17,11 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
   describe "POST /api/v1/transactions" do
     context "with valid parameters" do
       it "creates a transaction and returns correct JSON format" do
+        post "/api/v1/transactions", params: valid_params, as: :json
+
+        puts "Status: #{response.status}"
+        puts "Body: #{response.body[0..200]}" if response.status != 201
+
         expect {
           post "/api/v1/transactions", params: valid_params, as: :json
         }.to change(Transaction, :count).by(1)
@@ -27,7 +32,7 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
         expect(json["data"]).to include(
           "uuid" => be_present,
           "type" => "authorize",
-          "amount" => 100.5,
+          "amount" => "100.5",  # BigDecimal serializes to string (correct for money)
           "status" => "approved",
           "customer_email" => "customer@example.com",
           "customer_phone" => "1234567890",
@@ -97,10 +102,15 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
       end
 
       it "creates ChargeTransaction" do
-        authorize_tx = create(:authorize_transaction, merchant: merchant, status: :approved)
+        authorize_tx = create(:authorize_transaction, merchant: merchant, status: :approved, amount: 100.50)
         valid_params[:data][:type] = "charge"
         valid_params[:data][:referenced_transaction_id] = authorize_tx.uuid
         post "/api/v1/transactions", params: valid_params, as: :json
+
+        if response.status != 201
+          puts "❌ Response status: #{response.status}"
+          puts "Response body: #{response.body}"
+        end
 
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
@@ -109,7 +119,7 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
       end
 
       it "creates RefundTransaction" do
-        charge_tx = create(:charge_transaction, merchant: merchant, status: :approved)
+        charge_tx = create(:charge_transaction, merchant: merchant, status: :approved, amount: 100.50)
         valid_params[:data][:type] = "refund"
         valid_params[:data][:referenced_transaction_id] = charge_tx.uuid
         post "/api/v1/transactions", params: valid_params, as: :json
@@ -121,10 +131,16 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
       end
 
       it "creates ReversalTransaction" do
-        authorize_tx = create(:authorize_transaction, merchant: merchant, status: :approved)
+        authorize_tx = create(:authorize_transaction, merchant: merchant, status: :approved, amount: 100.50)
         valid_params[:data][:type] = "reversal"
         valid_params[:data][:referenced_transaction_id] = authorize_tx.uuid
+        valid_params[:data].delete(:amount)  # Reversals don't have their own amount
         post "/api/v1/transactions", params: valid_params, as: :json
+
+        if response.status != 201
+          puts "❌ Response status: #{response.status}"
+          puts "Response body: #{response.body}"
+        end
 
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)

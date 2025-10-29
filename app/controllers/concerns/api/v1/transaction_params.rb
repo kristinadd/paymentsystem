@@ -4,7 +4,6 @@ module Api
       extend ActiveSupport::Concern
 
       VALID_STATUSES = [ "approved", "reversed", "refunded", "error" ].freeze
-      VALID_TYPES = [ "authorize", "charge", "refund", "reversal" ].freeze
       PHONE_REGEX = /\A\d{10,15}\z/  # 10-15 digits only, no special characters
 
       class ValidationError < StandardError
@@ -45,9 +44,9 @@ module Api
       def validate_type(external_params, errors)
         type = external_params[:type]
         return errors[:type] = "Type is required" if type.blank?
-        return if VALID_TYPES.include?(type.to_s.downcase)
+        return if TransactionFactory::TYPES.include?(type.to_s.downcase)
 
-        errors[:type] = "Invalid transaction type: #{type}. Must be one of: #{VALID_TYPES.join(", ")}"
+        errors[:type] = "Invalid transaction type: #{type}. Must be one of: #{TransactionFactory::TYPES.join(", ")}"
       end
 
       def validate_status(external_params, errors)
@@ -68,6 +67,9 @@ module Api
       end
 
       def validate_amount(external_params, errors)
+        # Reversals don't require/allow amount
+        return if external_params[:type]&.downcase == "reversal"
+
         amount = external_params[:amount]
         return errors[:amount] = "Amount is required" if amount.blank?
         return if amount.to_f > 0
@@ -92,15 +94,22 @@ module Api
       end
 
       def build_internal_params(external_params)
-        {
+        params_hash = {
           type: external_params[:type],
           merchant_id: external_params[:merchant_id],
-          referenced_transaction_id: external_params[:referenced_transaction_id],
           amount: external_params[:amount],
           status: parse_status(external_params[:status]),
           customer_email: external_params[:customer_email],
           customer_phone: external_params[:customer_phone]
-        }.compact
+        }
+
+        # Convert referenced_transaction UUID to ID if provided
+        if external_params[:referenced_transaction_id].present?
+          referenced_tx = Transaction.find_by(uuid: external_params[:referenced_transaction_id])
+          params_hash[:referenced_transaction_id] = referenced_tx&.id
+        end
+
+        params_hash.compact
       end
 
       def parse_status(status)
