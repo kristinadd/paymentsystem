@@ -47,6 +47,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # REDIS SERVICE
+  # Redis is used by Sidekiq for job queues
+  redis:
+    image: redis:7-alpine
+    container_name: paymentsystem-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   # WEB SERVICE (Rails Application)
   # "web" is the name we give to our Rails application service
   # You can name it anything, but "web" is conventional for web apps
@@ -76,6 +91,8 @@ services:
     depends_on:
       db:
         condition: service_healthy  # Wait for PostgreSQL health check to pass
+      redis:
+        condition: service_healthy  # Wait for Redis health check to pass
     
     # VOLUME MOUNTS
     # This is KEY for development - it connects your code to the container
@@ -94,6 +111,9 @@ services:
     environment:
       # Run in development mode (not production!)
       - RAILS_ENV=development
+      
+      # Redis URL for Sidekiq
+      - REDIS_URL=redis://redis:6379/0
       
       # Show logs in terminal (useful for debugging)
       - RAILS_LOG_TO_STDOUT=true
@@ -131,6 +151,40 @@ services:
     stdin_open: true
     tty: true
 
+  # SIDEKIQ WORKER SERVICE
+  # Background job processor - runs scheduled jobs and queued jobs
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    
+    container_name: paymentsystem-sidekiq
+    
+    # Run Sidekiq worker process
+    command: bundle exec sidekiq
+    
+    # Same dependencies as web service
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    # Mount code and gems (same as web service)
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    
+    # Same environment as web service
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_HOST=db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password
+      - BUNDLE_DEPLOYMENT=0
+
 # NAMED VOLUMES
 # These are managed by Docker and persist data
 # Think of them as "special folders" that survive container deletion
@@ -143,4 +197,7 @@ volumes:
     # This volume stores PostgreSQL database files
     # Critical for data persistence across container restarts
     # Located at: /var/lib/postgresql/data inside the container
+  
+  redis_data:
+    # This volume stores Redis data (Sidekiq jobs)
 
