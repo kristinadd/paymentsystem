@@ -1,0 +1,67 @@
+.container.mt-5
+  .row
+    .col-12
+      .d-flex.justify-content-between.align-items-center.mb-4
+        div
+          h1.display-4 Transactions
+          - if current_user.admin?
+            p.text-muted.mb-0 Viewing all transactions (Admin)
+          - else
+            p.text-muted.mb-0 Viewing your transactions
+        span.badge.bg-primary.fs-5
+          = @transactions.count
+          |  transactions
+  
+  .row
+    .col-12
+      .card.shadow
+        .card-body
+          .table-responsive
+            table.table.table-hover.table-striped.align-middle
+              thead.table-dark
+                tr
+                  th UUID
+                  th Type
+                  th Merchant
+                  th Amount
+                  th Status
+                  th Customer Email
+                  th Referenced TX
+                  th Created At
+              tbody
+                - if @transactions.any?
+                  - @transactions.each do |transaction|
+                    tr
+                      td
+                        code.text-muted.small= transaction.uuid
+                      td
+                        span.badge class=transaction_type_badge_class(transaction.type)
+                          = transaction.type.gsub("Transaction", "")
+                      td
+                        = transaction.merchant.name
+                        br
+                        small.text-muted= transaction.merchant.email
+                      td.text-end
+                        - if transaction.amount
+                          strong= number_to_currency(transaction.amount)
+                        - else
+                          span.text-muted N/A
+                      td
+                        span.badge class=transaction_status_badge_class(transaction.status)
+                          = transaction.status.titleize
+                      td
+                        = transaction.customer_email
+                      td
+                        - if transaction.referenced_transaction
+                          code.text-muted.small= transaction.referenced_transaction.uuid
+                        - else
+                          span.text-muted —
+                      td
+                        = transaction.created_at.strftime("%Y-%m-%d %H:%M")
+                - else
+                  tr
+                    td.text-center.text-muted colspan="8"
+                      .py-5
+                        i.bi.bi-inbox.fs-1
+                        p.mt-3 No transactions found
+

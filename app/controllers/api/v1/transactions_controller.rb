@@ -4,6 +4,7 @@ module Api
       include ApiAuthentication
 
       skip_before_action :verify_authenticity_token
+      skip_before_action :authenticate_user! # Skip web authentication for API
 
       rescue_from ActionController::BadRequest, ArgumentError do |e|
         formatter = Formatters::Factory.for_request(request)
