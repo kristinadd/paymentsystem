@@ -13,18 +13,8 @@ class RefundTransaction < Transaction
 
   private
 
-  def set_default_status
-    self.status ||= :approved
-  end
-
   def check_referenced_transaction_status
-    return unless referenced_transaction
-    return if status == :error
-
-    unless referenced_transaction.approved?
-      self.status = :error
-      errors.add(:referenced_transaction, "must be an approved transaction")
-    end
+    check_referenced_status([ :approved ])
   end
 
   def referenced_must_be_charge

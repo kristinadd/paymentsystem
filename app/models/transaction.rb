@@ -32,4 +32,21 @@ class Transaction < ApplicationRecord
       errors.add(:merchant, "is not active")
     end
   end
+
+  # Shared helper methods for child transactions
+
+  def set_default_status
+    self.status ||= :approved
+  end
+
+  def check_referenced_status(allowed_statuses = [ :approved ])
+    return unless referenced_transaction
+    return if status == :error
+
+    unless Array(allowed_statuses).any? { |s| referenced_transaction.status == s.to_s }
+      self.status = :error
+      status_list = allowed_statuses.size == 1 ? "an #{allowed_statuses.first}" : "an #{allowed_statuses.map(&:to_s).join(' or ')}"
+      errors.add(:referenced_transaction, "must be #{status_list} transaction")
+    end
+  end
 end
