@@ -10,6 +10,7 @@ require 'rspec/rails'
 # Require supporting gems
 require 'shoulda/matchers'
 require 'database_cleaner/active_record'
+require 'capybara/rspec'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
