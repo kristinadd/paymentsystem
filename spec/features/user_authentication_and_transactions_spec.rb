@@ -210,11 +210,9 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
     end
 
     scenario "Shows empty state when no transactions" do
-      # Delete all transactions for this merchant (including the charge that references the authorize)
-      merchant.transactions.each do |txn|
-        txn.referencing_transactions.destroy_all
-        txn.destroy
-      end
+      # To respect foreign key constraints, destroy referencing transactions (e.g., Charge) first
+      merchant.transactions.where.not(referenced_transaction_id: nil).destroy_all
+      merchant.transactions.reload.destroy_all
 
       visit transactions_path
 
