@@ -1,4 +1,4 @@
-class ImportUserService
+class Imports::ImportUserService
   attr_reader :row, :errors
 
   def initialize(row)
