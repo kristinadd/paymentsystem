@@ -1,8 +1,13 @@
 FactoryBot.define do
   factory :api_key do
     merchant
-    key_digest { Digest::SHA256.hexdigest("sk_test_#{SecureRandom.hex(32)}") }
-    key_prefix { "sk_test_ab" }
+
+    transient do
+      raw_key { "sk_test_#{SecureRandom.hex(32)}" }
+    end
+
+    key_digest { Digest::SHA256.hexdigest(raw_key) }
+    key_prefix { raw_key[0, 10] }
     name { "Test API Key" }
     last_used_at { nil }
     expires_at { nil }

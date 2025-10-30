@@ -13,27 +13,18 @@ module Api
       def authenticate_api_key!
         api_key = extract_api_key_from_header
 
-        unless api_key
-          render_unauthorized("API key is missing")
-          return
-        end
+        return render_unauthorized("API key is missing") unless api_key
 
         @current_api_key = ApiKey.authenticate(api_key)
 
-        unless @current_api_key
-          render_unauthorized("Invalid API key")
-          return
-        end
+        return render_unauthorized("Invalid API key") unless @current_api_key
 
-        unless @current_api_key.active?
-          render_unauthorized("API key has expired")
-          return
-        end
+        return render_unauthorized("API key has expired") unless @current_api_key.active?
 
         # Set the current merchant
         @current_merchant = @current_api_key.merchant
 
-        # Track usage, so we can revoke keys that are not used for a long time, security best practice
+        # Track usage
         @current_api_key.touch_last_used!
       end
 

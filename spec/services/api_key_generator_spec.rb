@@ -21,8 +21,9 @@ RSpec.describe ApiKeyGenerator do
     it "generates a key with the correct length" do
       result = described_class.generate(merchant: merchant)
 
-      # sk_ (3 chars) + 64 hex chars (32 bytes * 2)
-      expect(result[:raw_key].length).to eq(67)
+      # PREFIX + hex representation of KEY_LENGTH bytes (2 chars per byte)
+      expected_length = described_class::PREFIX.length + (described_class::KEY_LENGTH * 2)
+      expect(result[:raw_key].length).to eq(expected_length)
     end
 
     it "generates unique keys" do
