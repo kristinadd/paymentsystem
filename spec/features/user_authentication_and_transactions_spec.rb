@@ -24,12 +24,12 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
       expect(page).to have_field("Email Address")
 
       # Fill in email and submit
-      fill_in "Email Address", with: "admin@example.com"
+      fill_in "Email Address", with: admin_user.email
       click_button "Sign In"
 
       # Should be redirected to transactions page
       expect(page).to have_current_path(root_path)
-      expect(page).to have_content("Welcome back, Admin User!")
+      expect(page).to have_content("Welcome back, #{admin_user.name}!")
       expect(page).to have_content("Transactions")
     end
 
@@ -56,7 +56,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
         visit transactions_path
 
         expect(page).to have_content("Viewing all transactions (Admin)")
-        expect(page).to have_content("Admin User")
+        expect(page).to have_content(admin_user.name)
         expect(page).to have_content("Admin")
 
         # Should see both transactions
@@ -93,7 +93,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
         visit transactions_path
 
         expect(page).to have_content("Viewing your transactions")
-        expect(page).to have_content("Merchant User")
+        expect(page).to have_content(merchant_user.name)
         expect(page).to have_content("Merchant")
 
         # Should see only their transaction
@@ -163,7 +163,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
       # Should be redirected to login page
       expect(page).to have_current_path(login_path)
       expect(page).to have_content("Logged out successfully")
-      expect(page).not_to have_content("Admin User")
+      expect(page).not_to have_content(admin_user.name)
     end
 
     scenario "After logout, user cannot access protected pages" do
