@@ -1,6 +1,34 @@
 require 'rails_helper'
 
 RSpec.describe ChargeTransaction, type: :model do
+  # Shared example: merchant status requirements
+  it_behaves_like "enforces merchant status" do
+    def build_transaction_with_active_merchant(merchant)
+      authorize = create(:authorize_transaction, merchant: merchant, status: :approved, amount: 100)
+      build(:charge_transaction, merchant: merchant, referenced_transaction: authorize, amount: 100, create_authorize: false)
+    end
+
+    def build_transaction_with_inactive_merchant(inactive_merchant, active_merchant)
+      authorize = create(:authorize_transaction, merchant: active_merchant, status: :approved, amount: 100)
+      build(:charge_transaction, merchant: inactive_merchant, referenced_transaction: authorize, amount: 100, create_authorize: false)
+    end
+  end
+
+  # Shared example: duplicate transaction prevention
+  it_behaves_like "prevents duplicate transactions" do
+    def create_parent_transaction
+      create(:authorize_transaction, status: :approved, amount: 100)
+    end
+
+    def create_child_transaction(parent)
+      create(:charge_transaction, referenced_transaction: parent, amount: 100, create_authorize: false)
+    end
+
+    def build_child_transaction(parent)
+      build(:charge_transaction, referenced_transaction: parent, amount: 100, create_authorize: false)
+    end
+  end
+
   describe "create charge transaction" do
     context "when authorize is approved" do
       it "creates charge with approved status" do
@@ -30,21 +58,6 @@ RSpec.describe ChargeTransaction, type: :model do
     end
   end
 
-  describe "duplicate charge prevention" do
-    it "prevents creating multiple charges for same authorize" do
-      authorize = create(:authorize_transaction, status: :approved, amount: 100)
-
-      # First charge - should succeed
-      charge1 = create(:charge_transaction, referenced_transaction: authorize, amount: 100, create_authorize: false)
-      expect(charge1).to be_persisted
-
-      # Second charge - should fail
-      charge2 = build(:charge_transaction, referenced_transaction: authorize, amount: 100, create_authorize: false)
-      expect(charge2).not_to be_valid
-      expect(charge2.errors[:referenced_transaction]).to include("already has a charge transaction")
-    end
-  end
-
   describe "merchant total_transaction_sum update" do
     let(:merchant) { create(:merchant, total_transaction_sum: 0) }
 
@@ -69,7 +82,7 @@ RSpec.describe ChargeTransaction, type: :model do
       # Should be invalid due to authorize having error status
       expect(charge).not_to be_valid
       expect(charge.status).to eq("error")
-      expect(charge.errors[:referenced_transaction]).to include("must be an approved or refunded transaction")
+      expect(charge.errors[:referenced_transaction]).to include("must be approved or refunded transaction")
 
       # Merchant total should not change
       expect(merchant.reload.total_transaction_sum).to eq(0)

@@ -45,7 +45,7 @@ class Transaction < ApplicationRecord
 
     unless Array(allowed_statuses).any? { |s| referenced_transaction.status == s.to_s }
       self.status = :error
-      status_list = allowed_statuses.size == 1 ? "an #{allowed_statuses.first}" : "an #{allowed_statuses.map(&:to_s).join(' or ')}"
+      status_list = allowed_statuses.map(&:to_s).join(" or ")
       errors.add(:referenced_transaction, "must be #{status_list} transaction")
     end
   end

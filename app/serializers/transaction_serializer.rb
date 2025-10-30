@@ -20,17 +20,6 @@ class TransactionSerializer
   private
 
   def external_type
-    case @transaction.type
-    when "AuthorizeTransaction"
-      "authorize"
-    when "ChargeTransaction"
-      "charge"
-    when "RefundTransaction"
-      "refund"
-    when "ReversalTransaction"
-      "reversal"
-    else
-        raise ArgumentError, "Unknown transaction type: #{@transaction.type}. Must be one of: #{Transactions::Factory::TYPES.join(", ")}"
-    end
+    @transaction.class.external_type
   end
 end

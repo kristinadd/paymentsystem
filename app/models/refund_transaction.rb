@@ -11,6 +11,10 @@ class RefundTransaction < Transaction
 
   after_commit :process_approved_refund, if: -> { saved_change_to_status? && approved? }
 
+  def self.external_type
+    "refund"
+  end
+
   private
 
   def check_referenced_transaction_status

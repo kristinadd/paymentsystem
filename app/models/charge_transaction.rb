@@ -12,6 +12,10 @@ class ChargeTransaction < Transaction
 
   after_commit :process_approved_charge, if: -> { saved_change_to_status? && approved? }
 
+  def self.external_type
+    "charge"
+  end
+
   private
 
   def check_referenced_transaction_status

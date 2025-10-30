@@ -12,6 +12,10 @@ class ReversalTransaction < Transaction
 
   after_commit :process_approved_reversal, if: -> { saved_change_to_status? && approved? }
 
+  def self.external_type
+    "reversal"
+  end
+
   private
 
   def check_referenced_transaction_status

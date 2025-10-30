@@ -1,5 +1,12 @@
 class Transactions::Factory
-  TYPES = [ "authorize", "charge", "refund", "reversal" ].freeze
+  REGISTRY = {
+    "authorize" => AuthorizeTransaction,
+    "charge" => ChargeTransaction,
+    "refund" => RefundTransaction,
+    "reversal" => ReversalTransaction
+  }.freeze
+
+  TYPES = REGISTRY.keys.freeze
 
   def self.create(type:, **attributes)
     transaction_class = resolve_transaction_class(type)
@@ -7,17 +14,12 @@ class Transactions::Factory
   end
 
   def self.resolve_transaction_class(type)
-    case type&.downcase
-    when "authorize"
-      AuthorizeTransaction
-    when "charge"
-      ChargeTransaction
-    when "refund"
-      RefundTransaction
-    when "reversal"
-      ReversalTransaction
-    else
+    transaction_class = REGISTRY[type&.downcase]
+
+    unless transaction_class
       raise ArgumentError, "Invalid transaction type: #{type}. Must be one of: #{TYPES.join(", ")}"
     end
+
+    transaction_class
   end
 end
