@@ -1,4 +1,4 @@
-class ImportMerchantService
+class Imports::ImportMerchantService
   attr_reader :row, :user, :errors
 
   def initialize(row, user)

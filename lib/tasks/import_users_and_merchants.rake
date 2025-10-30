@@ -13,7 +13,7 @@ namespace :users do
     puts "=" * 60
 
     begin
-      orchestrator = ImportUsersAndMerchantsOrchestrator.new(file_path)
+      orchestrator = Imports::ImportUsersAndMerchantsOrchestrator.new(file_path)
       orchestrator.import
 
       puts "\n" + orchestrator.summary
