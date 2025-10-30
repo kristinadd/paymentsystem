@@ -11,9 +11,10 @@ class TransactionSerializer
       status: @transaction.status,
       customer_email: @transaction.customer_email,
       customer_phone: @transaction.customer_phone,
+      referenced_transaction_uuid: @transaction.referenced_transaction&.uuid,
       created_at: @transaction.created_at,
       updated_at: @transaction.updated_at
-    }
+    }.compact
   end
 
   private
