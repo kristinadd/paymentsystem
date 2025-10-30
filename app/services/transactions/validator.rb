@@ -1,4 +1,4 @@
-class TransactionValidator
+class Transactions::Validator
   VALID_STATUSES = [ "approved", "reversed", "refunded", "error" ].freeze
   PHONE_REGEX = /\A\d{10,15}\z/  # 10-15 digits only, no special characters
 
@@ -48,9 +48,9 @@ class TransactionValidator
   def validate_type
     type = params[:type]
     return @errors[:type] = "Type is required" if type.blank?
-    return if TransactionFactory::TYPES.include?(type.to_s.downcase)
+    return if Transactions::Factory::TYPES.include?(type.to_s.downcase)
 
-    @errors[:type] = "Invalid transaction type: #{type}. Must be one of: #{TransactionFactory::TYPES.join(", ")}"
+    @errors[:type] = "Invalid transaction type: #{type}. Must be one of: #{Transactions::Factory::TYPES.join(", ")}"
   end
 
   def validate_status

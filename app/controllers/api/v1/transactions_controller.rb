@@ -12,7 +12,7 @@ module Api
                content_type: formatter.content_type
       end
 
-      rescue_from TransactionValidator::ValidationError do |e|
+      rescue_from Transactions::Validator::ValidationError do |e|
         formatter = Formatters::FormatterFactory.for_request(request)
         render body: formatter.serialize_error(e.errors),
                status: :bad_request,
@@ -36,7 +36,7 @@ module Api
 
         internal_params = transform_params(external_params)
 
-        transaction = TransactionFactory.create(**internal_params)
+        transaction = Transactions::Factory.create(**internal_params)
 
         render body: formatter.serialize(transaction),
                status: :created,
@@ -68,10 +68,10 @@ module Api
       end
 
       def transform_params(external_params)
-        validator = TransactionValidator.new(external_params)
+        validator = Transactions::Validator.new(external_params)
         validator.validate!
 
-        builder = TransactionBuilder.new(external_params)
+        builder = Transactions::Builder.new(external_params)
         builder.build
       end
     end

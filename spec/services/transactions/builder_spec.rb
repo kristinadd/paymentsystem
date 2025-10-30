@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe TransactionBuilder do
+RSpec.describe Transactions::Builder do
   let(:merchant) { create(:merchant) }
   let(:external_params) do
     {

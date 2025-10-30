@@ -1,5 +1,4 @@
-
-class TransactionBuilder
+class Transactions::Builder
   def initialize(params)
     @params = params
   end
