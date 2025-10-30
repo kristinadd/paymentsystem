@@ -20,4 +20,17 @@ class Formatters::BaseFormatter
   def transaction_to_hash(transaction)
     TransactionSerializer.new(transaction).as_json
   end
+
+  def format_errors(errors)
+    case errors
+    when Hash
+      { errors: errors }
+    when ActiveModel::Errors
+      { errors: errors.messages }
+    when String
+      { error: errors }
+    else
+      { error: errors.to_s }
+    end
+  end
 end

@@ -35,6 +35,21 @@ RSpec.describe Formatters::XmlFormatter do
         expect(result.keys).to all(be_a(Symbol))
         expect(result[:data].keys).to all(be_a(Symbol))
       end
+
+      it "handles <data> as root element without <request> wrapper" do
+        xml_string = <<~XML
+          <data>
+            <type>authorize</type>
+            <merchant_id>123</merchant_id>
+            <amount>100.50</amount>
+          </data>
+        XML
+
+        result = formatter.parse(xml_string)
+
+        expect(result).to eq({ data: { type: "authorize", merchant_id: "123", amount: "100.50" } })
+        expect(result[:data]).to include(:type, :merchant_id, :amount)
+      end
     end
 
     context "with invalid XML" do

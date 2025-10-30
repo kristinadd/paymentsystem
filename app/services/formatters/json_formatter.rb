@@ -19,19 +19,4 @@ class Formatters::JsonFormatter < Formatters::BaseFormatter
   def content_type
     "application/json"
   end
-
-  private
-
-  def format_errors(errors)
-    case errors
-    when Hash
-      { errors: errors }
-    when ActiveModel::Errors
-      { errors: errors.messages }
-    when String
-      { error: errors }
-    else
-      { error: errors.to_s }
-    end
-  end
 end

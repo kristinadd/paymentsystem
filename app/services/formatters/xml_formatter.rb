@@ -1,7 +1,9 @@
 class Formatters::XmlFormatter < Formatters::BaseFormatter
   def parse(request_body)
     parsed = Hash.from_xml(request_body).deep_symbolize_keys
-    parsed.values.first.is_a?(Hash) ? parsed.values.first : parsed
+    # Unwrap <request> wrapper if present, otherwise return parsed hash
+    # This handles both <request><data>...</data></request> and <data>...</data>
+    parsed.key?(:request) ? parsed[:request] : parsed
   rescue REXML::ParseException => e
     raise ActionController::BadRequest, "Invalid XML: #{e.message}"
   end
@@ -18,20 +20,5 @@ class Formatters::XmlFormatter < Formatters::BaseFormatter
 
   def content_type
     "application/xml"
-  end
-
-  private
-
-  def format_errors(errors)
-    case errors
-    when Hash
-      { errors: errors }
-    when ActiveModel::Errors
-      { errors: errors.messages }
-    when String
-      { error: errors }
-    else
-      { error: errors.to_s }
-    end
   end
 end

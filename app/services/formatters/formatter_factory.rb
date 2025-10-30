@@ -6,16 +6,7 @@ class Formatters::FormatterFactory
   }.freeze
 
   def self.for_request(request)
-    content_type = request.content_type
-    formatter_class = FORMATTERS[content_type]
-
-    unless formatter_class
-      supported = FORMATTERS.keys.join(", ")
-      raise ActionController::BadRequest,
-            "Unsupported Content-Type: #{content_type}. Supported types: #{supported}"
-    end
-
-    formatter_class.new
+    for_content_type(request.content_type)
   end
 
   def self.for_content_type(content_type)
