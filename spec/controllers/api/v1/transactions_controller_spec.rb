@@ -2,6 +2,9 @@ require "rails_helper"
 
 RSpec.describe Api::V1::TransactionsController, type: :request do
   let(:merchant) { create(:merchant) }
+  let(:api_key_result) { ApiKeyGenerator.generate(merchant: merchant) }
+  let(:api_key) { api_key_result[:raw_key] }
+
   let(:valid_data) do
     {
       type: "authorize",
@@ -54,8 +57,11 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
 
     it "returns 400 with inactive merchant in #{format.upcase}" do
       inactive_merchant = create(:merchant, :inactive)
+      # Need API key for inactive merchant to get past authentication
+      inactive_key_result = ApiKeyGenerator.generate(merchant: inactive_merchant)
       invalid_data = valid_data.merge(merchant_id: inactive_merchant.id)
-      make_request(format, invalid_data)
+
+      make_request(format, invalid_data, custom_api_key: inactive_key_result[:raw_key])
 
       expect(response).to have_http_status(:bad_request)
       expect(response.content_type).to include(content_type_for(format))
@@ -65,13 +71,15 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
     end
 
     it "returns all validation errors at once in #{format.upcase}" do
+      # Use a valid merchant but with completely invalid transaction data
       invalid_data = {
         type: "invalid_type",
-        merchant_id: 999999,
+        merchant_id: merchant.id,  # Use valid merchant for authentication
         amount: -10,
         customer_email: "not-an-email",
         customer_phone: "abc"
       }
+
       make_request(format, invalid_data)
 
       expect(response).to have_http_status(:bad_request)
@@ -80,7 +88,6 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
       parsed = parse_response(format, response.body)
       expect(parsed["errors"]).to include(
         "type" => include("Invalid transaction type"),
-        "merchant_id" => "Merchant not found",
         "amount" => "Amount must be greater than 0",
         "customer_email" => "Customer email is invalid",
         "customer_phone" => "Customer phone is invalid"
@@ -176,35 +183,124 @@ RSpec.describe Api::V1::TransactionsController, type: :request do
         expect(response).to have_http_status(:bad_request)
       end
     end
+
+    context "authentication" do
+      it "returns 401 when no API key is provided" do
+        post "/api/v1/transactions",
+             params: { data: valid_data }.to_json,
+             headers: { "Content-Type" => "application/json" }
+
+        expect(response).to have_http_status(:unauthorized)
+        parsed = JSON.parse(response.body)
+        expect(parsed["error"]).to eq("API key is missing")
+      end
+
+      it "returns 401 when invalid API key is provided" do
+        post "/api/v1/transactions",
+             params: { data: valid_data }.to_json,
+             headers: {
+               "Content-Type" => "application/json",
+               "Authorization" => "Bearer sk_invalid_key"
+             }
+
+        expect(response).to have_http_status(:unauthorized)
+        parsed = JSON.parse(response.body)
+        expect(parsed["error"]).to eq("Invalid API key")
+      end
+
+      it "returns 401 when expired API key is provided" do
+        # Generate a real key and then revoke it
+        expired_key_result = ApiKeyGenerator.generate(merchant: merchant)
+        raw_key = expired_key_result[:raw_key]
+        expired_key_result[:api_key].revoke!
+
+        post "/api/v1/transactions",
+             params: { data: valid_data }.to_json,
+             headers: {
+               "Content-Type" => "application/json",
+               "Authorization" => "Bearer #{raw_key}"
+             }
+
+        expect(response).to have_http_status(:unauthorized)
+        parsed = JSON.parse(response.body)
+        expect(parsed["error"]).to eq("API key has expired")
+      end
+
+      it "returns 400 when merchant_id does not match authenticated merchant" do
+        other_merchant = create(:merchant)
+        invalid_data = valid_data.merge(merchant_id: other_merchant.id)
+
+        post "/api/v1/transactions",
+             params: { data: invalid_data }.to_json,
+             headers: {
+               "Content-Type" => "application/json",
+               "Authorization" => "Bearer #{api_key}"
+             }
+
+        expect(response).to have_http_status(:bad_request)
+        parsed = JSON.parse(response.body)
+        expect(parsed["error"]).to include("merchant_id must match the authenticated merchant")
+      end
+
+      it "tracks API key usage" do
+        api_key_record = api_key_result[:api_key]
+        expect(api_key_record.last_used_at).to be_nil
+
+        post "/api/v1/transactions",
+             params: { data: valid_data }.to_json,
+             headers: {
+               "Content-Type" => "application/json",
+               "Authorization" => "Bearer #{api_key}"
+             }
+
+        expect(api_key_record.reload.last_used_at).to be_within(1.second).of(Time.current)
+      end
+    end
   end
 
   private
 
   # Helper to make requests in different formats
-  def make_request(format, data)
+  def make_request(format, data, custom_api_key: nil)
+    auth_key = custom_api_key || api_key
+
     case format
     when :json
       post "/api/v1/transactions",
            params: { data: data }.to_json,
-           headers: { "Content-Type" => "application/json" }
+           headers: {
+             "Content-Type" => "application/json",
+             "Authorization" => "Bearer #{auth_key}"
+           }
     when :xml
       post "/api/v1/transactions",
            params: { data: data }.to_xml(root: "request", skip_instruct: true),
-           headers: { "Content-Type" => "application/xml" }
+           headers: {
+             "Content-Type" => "application/xml",
+             "Authorization" => "Bearer #{auth_key}"
+           }
     end
   end
 
   # Helper to make requests without data wrapper
-  def make_request_without_wrapper(format, data)
+  def make_request_without_wrapper(format, data, custom_api_key: nil)
+    auth_key = custom_api_key || api_key
+
     case format
     when :json
       post "/api/v1/transactions",
            params: data.to_json,
-           headers: { "Content-Type" => "application/json" }
+           headers: {
+             "Content-Type" => "application/json",
+             "Authorization" => "Bearer #{auth_key}"
+           }
     when :xml
       post "/api/v1/transactions",
            params: data.to_xml(root: "request", skip_instruct: true),
-           headers: { "Content-Type" => "application/xml" }
+           headers: {
+             "Content-Type" => "application/xml",
+             "Authorization" => "Bearer #{auth_key}"
+           }
     end
   end
 
