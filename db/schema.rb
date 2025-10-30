@@ -10,10 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_28_093408) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_30_094756) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.string "key_digest", null: false
+    t.string "key_prefix", null: false
+    t.datetime "last_used_at"
+    t.bigint "merchant_id", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["key_digest"], name: "index_api_keys_on_key_digest", unique: true
+    t.index ["merchant_id"], name: "index_api_keys_on_merchant_id"
+  end
 
   create_table "merchants", force: :cascade do |t|
     t.boolean "active"
@@ -58,6 +71,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_28_093408) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "api_keys", "merchants"
   add_foreign_key "merchants", "users"
   add_foreign_key "transactions", "merchants"
   add_foreign_key "transactions", "transactions", column: "referenced_transaction_id"
