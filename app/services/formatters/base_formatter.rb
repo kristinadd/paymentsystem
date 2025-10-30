@@ -22,15 +22,33 @@ class Formatters::BaseFormatter
   end
 
   def format_errors(errors)
-    case errors
+    formatted = case errors
     when Hash
-      { errors: errors }
+      errors
     when ActiveModel::Errors
-      { errors: errors.messages }
+      errors.messages
     when String
-      { error: errors }
+      return { error: errors }
     else
-      { error: errors.to_s }
+      return { error: errors.to_s }
+    end
+
+    # Remap internal field names to API field names for consistency
+    formatted = remap_error_fields(formatted)
+
+    { errors: formatted }
+  end
+
+  def remap_error_fields(errors)
+    return errors unless errors.is_a?(Hash)
+
+    errors.transform_keys do |key|
+      case key.to_sym
+      when :referenced_transaction
+        :referenced_transaction_uuid
+      else
+        key
+      end
     end
   end
 end
