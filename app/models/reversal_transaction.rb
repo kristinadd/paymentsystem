@@ -12,20 +12,14 @@ class ReversalTransaction < Transaction
 
   after_commit :process_approved_reversal, if: -> { saved_change_to_status? && approved? }
 
-  private
-
-  def set_default_status
-    self.status ||= :approved
+  def self.external_type
+    "reversal"
   end
 
-  def check_referenced_transaction_status
-    return unless referenced_transaction
-    return if status == :error
+  private
 
-    unless referenced_transaction.approved?
-      self.status = :error
-      errors.add(:referenced_transaction, "must be an approved transaction")
-    end
+  def check_referenced_transaction_status
+    check_referenced_status([ :approved ])
   end
 
   def referenced_must_be_authorize

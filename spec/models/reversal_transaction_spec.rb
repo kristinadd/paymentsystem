@@ -1,6 +1,34 @@
 require 'rails_helper'
 
 RSpec.describe ReversalTransaction, type: :model do
+  # Shared example: merchant status requirements
+  it_behaves_like "enforces merchant status" do
+    def build_transaction_with_active_merchant(merchant)
+      authorize = create(:authorize_transaction, merchant: merchant, amount: 100.0)
+      build(:reversal_transaction, merchant: merchant, referenced_transaction: authorize, create_authorize: false)
+    end
+
+    def build_transaction_with_inactive_merchant(inactive_merchant, active_merchant)
+      authorize = create(:authorize_transaction, merchant: active_merchant, amount: 100.0)
+      build(:reversal_transaction, merchant: inactive_merchant, referenced_transaction: authorize, create_authorize: false)
+    end
+  end
+
+  # Shared example: duplicate transaction prevention
+  it_behaves_like "prevents duplicate transactions" do
+    def create_parent_transaction
+      create(:authorize_transaction)
+    end
+
+    def create_child_transaction(parent)
+      create(:reversal_transaction, referenced_transaction: parent, create_authorize: false)
+    end
+
+    def build_child_transaction(parent)
+      build(:reversal_transaction, referenced_transaction: parent, create_authorize: false)
+    end
+  end
+
   describe "validations" do
     context "referenced_transaction" do
       it "requires referenced_transaction" do
@@ -46,7 +74,7 @@ RSpec.describe ReversalTransaction, type: :model do
 
         expect(reversal).not_to be_valid
         expect(reversal.status).to eq("error")
-        expect(reversal.errors[:referenced_transaction]).to include("must be an approved transaction")
+        expect(reversal.errors[:referenced_transaction]).to include("must be approved transaction")
       end
 
       it "keeps approved status when authorize is approved" do
@@ -73,25 +101,6 @@ RSpec.describe ReversalTransaction, type: :model do
         expect(reversal).to be_valid
       end
     end
-
-    context "duplicate reversals" do
-      it "prevents multiple reversals for same authorize" do
-        authorize = create(:authorize_transaction)
-        reversal1 = create(:reversal_transaction, referenced_transaction: authorize, create_authorize: false)
-
-        expect(reversal1).to be_persisted
-
-        # Reload authorize to get updated status
-        authorize.reload
-
-        # Try to create second reversal - authorize is now "reversed"
-        reversal2 = build(:reversal_transaction, referenced_transaction: authorize, create_authorize: false)
-
-        # Should be invalid with clear error message
-        expect(reversal2).not_to be_valid
-        expect(reversal2.errors[:referenced_transaction]).to include("must be an approved transaction")
-      end
-    end
   end
 
   describe "STI type column" do
@@ -104,35 +113,6 @@ RSpec.describe ReversalTransaction, type: :model do
       create(:reversal_transaction)
       expect(ReversalTransaction.count).to eq(1)
       expect(Transaction.count).to eq(2) # Authorize + Reversal
-    end
-  end
-
-  describe "merchant status requirements" do
-    context "when merchant is active" do
-      let(:merchant) { create(:merchant) }
-
-      it "allows transaction creation" do
-        authorize = create(:authorize_transaction, merchant: merchant)
-        reversal = build(:reversal_transaction, merchant: merchant, referenced_transaction: authorize, create_authorize: false)
-
-        expect(reversal).to be_valid
-      end
-    end
-
-    context "when merchant is inactive" do
-      let(:merchant) { create(:merchant, :inactive) }
-      let(:active_merchant) { create(:merchant) }
-
-      it "prevents transaction creation" do
-        # Create authorize with active merchant
-        authorize = create(:authorize_transaction, merchant: active_merchant, amount: 100.0)
-
-        # Try to create reversal with inactive merchant
-        reversal = build(:reversal_transaction, merchant: merchant, referenced_transaction: authorize, create_authorize: false)
-
-        expect(reversal).not_to be_valid
-        expect(reversal.errors[:merchant]).to include("is not active")
-      end
     end
   end
 
@@ -200,7 +180,7 @@ RSpec.describe ReversalTransaction, type: :model do
 
       expect(charge).not_to be_valid
       expect(charge.status).to eq("error")
-      expect(charge.errors[:referenced_transaction]).to include("must be an approved or refunded transaction")
+      expect(charge.errors[:referenced_transaction]).to include("must be approved or refunded transaction")
     end
 
     it "is part of transaction chain" do

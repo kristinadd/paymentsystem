@@ -1,6 +1,36 @@
 require 'rails_helper'
 
 RSpec.describe RefundTransaction, type: :model do
+  # Shared example: merchant status requirements
+  it_behaves_like "enforces merchant status" do
+    def build_transaction_with_active_merchant(merchant)
+      authorize = create(:authorize_transaction, merchant: merchant, amount: 100.0)
+      charge = create(:charge_transaction, merchant: merchant, referenced_transaction: authorize, amount: 100.0, create_authorize: false)
+      build(:refund_transaction, merchant: merchant, referenced_transaction: charge, create_charge: false, amount: charge.amount)
+    end
+
+    def build_transaction_with_inactive_merchant(inactive_merchant, active_merchant)
+      authorize = create(:authorize_transaction, merchant: active_merchant, amount: 100.0)
+      charge = create(:charge_transaction, merchant: active_merchant, referenced_transaction: authorize, amount: 100.0, create_authorize: false)
+      build(:refund_transaction, merchant: inactive_merchant, referenced_transaction: charge, create_charge: false, amount: charge.amount)
+    end
+  end
+
+  # Shared example: duplicate transaction prevention
+  it_behaves_like "prevents duplicate transactions" do
+    def create_parent_transaction
+      create(:charge_transaction)
+    end
+
+    def create_child_transaction(parent)
+      create(:refund_transaction, referenced_transaction: parent, create_charge: false, amount: parent.amount)
+    end
+
+    def build_child_transaction(parent)
+      build(:refund_transaction, referenced_transaction: parent, create_charge: false, amount: parent.amount)
+    end
+  end
+
   describe "validations" do
     context "referenced_transaction" do
       it "requires referenced_transaction" do
@@ -54,7 +84,7 @@ RSpec.describe RefundTransaction, type: :model do
 
         expect(refund).not_to be_valid
         expect(refund.status).to eq("error")
-        expect(refund.errors[:referenced_transaction]).to include("must be an approved transaction")
+        expect(refund.errors[:referenced_transaction]).to include("must be approved transaction")
       end
 
       it "keeps approved status when charge is approved" do
@@ -72,56 +102,7 @@ RSpec.describe RefundTransaction, type: :model do
 
         expect(refund).not_to be_valid
         expect(refund.status).to eq("error")
-        expect(refund.errors[:referenced_transaction]).to include("must be an approved transaction")
-      end
-    end
-
-    context "duplicate refunds" do
-      it "prevents multiple refunds for same charge" do
-        charge = create(:charge_transaction)
-        refund1 = create(:refund_transaction, referenced_transaction: charge, create_charge: false, amount: charge.amount)
-
-        expect(refund1).to be_persisted
-
-        # Reload charge to get updated status
-        charge.reload
-
-        # Try to create second refund - charge is now "refunded"
-        refund2 = build(:refund_transaction, referenced_transaction: charge, create_charge: false, amount: charge.amount)
-
-        # Should be invalid with clear error message
-        expect(refund2).not_to be_valid
-        expect(refund2.errors[:referenced_transaction]).to include("must be an approved transaction")
-      end
-    end
-  end
-
-  describe "merchant status requirements" do
-    context "when merchant is active" do
-      let(:merchant) { create(:merchant) }
-
-      it "allows transaction creation" do
-        charge = create(:charge_transaction, merchant: merchant)
-        refund = build(:refund_transaction, merchant: merchant, referenced_transaction: charge, create_charge: false, amount: charge.amount)
-
-        expect(refund).to be_valid
-      end
-    end
-
-    context "when merchant is inactive" do
-      let(:merchant) { create(:merchant, :inactive) }
-      let(:active_merchant) { create(:merchant) }
-
-      it "prevents transaction creation" do
-        # Create authorize and charge with active merchant and matching amounts
-        authorize = create(:authorize_transaction, merchant: active_merchant, amount: 100.0)
-        charge = create(:charge_transaction, merchant: active_merchant, referenced_transaction: authorize, amount: 100.0, create_authorize: false)
-
-        # Try to create refund with inactive merchant
-        refund = build(:refund_transaction, merchant: merchant, referenced_transaction: charge, create_charge: false, amount: charge.amount)
-
-        expect(refund).not_to be_valid
-        expect(refund.errors[:merchant]).to include("is not active")
+        expect(refund.errors[:referenced_transaction]).to include("must be approved transaction")
       end
     end
   end
