@@ -1,6 +1,8 @@
 module Api
   module V1
     class TransactionsController < ApplicationController
+      include ApiAuthentication
+
       skip_before_action :verify_authenticity_token
 
       rescue_from ActionController::BadRequest, ArgumentError do |e|
@@ -28,6 +30,10 @@ module Api
         formatter = Formatters::FormatterFactory.for_request(request)
         parsed_data = formatter.parse(request.body.read)
         external_params = extract_params(parsed_data)
+
+        # Validate merchant_id matches authenticated merchant
+        validate_merchant!(external_params)
+
         internal_params = transform_params(external_params)
 
         transaction = TransactionFactory.create(**internal_params)
@@ -50,6 +56,15 @@ module Api
           :type, :merchant_id, :referenced_transaction_id, :amount,
           :status, :customer_email, :customer_phone
         )
+      end
+
+      def validate_merchant!(params)
+        merchant_id = params[:merchant_id]&.to_i
+
+        unless merchant_id == current_merchant.id
+          raise ActionController::BadRequest,
+                "merchant_id must match the authenticated merchant (#{current_merchant.id})"
+        end
       end
 
       def transform_params(external_params)
