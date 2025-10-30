@@ -9,12 +9,21 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # API routes
   namespace :api do
     namespace :v1 do
       post "transactions", to: "transactions#create"
     end
   end
 
+  # Authentication routes
+  get "login", to: "sessions#new"
+  post "login", to: "sessions#create"
+  delete "logout", to: "sessions#destroy"
+
+  # Web UI routes
+  resources :transactions, only: [ :index ]
+
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "transactions#index"
 end

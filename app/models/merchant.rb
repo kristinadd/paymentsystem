@@ -1,6 +1,7 @@
 class Merchant < ApplicationRecord
   belongs_to :user
   has_many :transactions, dependent: :restrict_with_error
+  has_many :api_keys, dependent: :destroy
 
   validates :name, presence: true
   validates :email, presence: true,

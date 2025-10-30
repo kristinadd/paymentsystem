@@ -1,0 +1,27 @@
+.container.mt-5
+  .row.justify-content-center
+    .col-md-6.col-lg-4
+      .card.shadow
+        .card-body.p-5
+          h2.text-center.mb-4 Login
+          p.text-center.text-muted Sign in to access the payment system
+          
+          = form_with url: login_path, method: :post, local: true do |f|
+            .mb-3
+              = f.label :email, "Email Address", class: "form-label"
+              = f.email_field :email, class: "form-control", placeholder: "Enter your email", required: true, autofocus: true
+              small.form-text.text-muted We'll never share your email with anyone else.
+            
+            .d-grid
+              = f.submit "Sign In", class: "btn btn-primary btn-lg"
+          
+          hr.my-4
+          
+          .text-center
+            p.text-muted.small
+              | Demo Users:
+              br
+              | Admin: admin@example.com
+              br
+              | Merchant: merchant@example.com
+
