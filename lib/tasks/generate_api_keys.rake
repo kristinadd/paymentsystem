@@ -39,4 +39,3 @@ namespace :api_keys do
     puts "     -d '{\"data\":{\"type\":\"authorize\",\"merchant_id\":1,\"amount\":100.50,\"customer_email\":\"test@example.com\",\"customer_phone\":\"1234567890\"}}'"
   end
 end
-
