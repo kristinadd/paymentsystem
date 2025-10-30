@@ -1,4 +1,4 @@
-class Formatters::BaseFormatter
+class Formatters::Base
   def parse(request_body)
     raise NotImplementedError, "#{self.class} must implement #parse"
   end

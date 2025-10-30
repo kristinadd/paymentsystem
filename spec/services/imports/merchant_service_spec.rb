@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Imports::ImportMerchantService, type: :service do
+RSpec.describe Imports::MerchantService, type: :service do
   let(:user) { create(:user, role: :merchant) }
   let(:valid_row) do
     {

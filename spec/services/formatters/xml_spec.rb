@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Formatters::XmlFormatter do
+RSpec.describe Formatters::Xml do
   let(:formatter) { described_class.new }
   let(:transaction) { create(:authorize_transaction, amount: 100.50) }
 

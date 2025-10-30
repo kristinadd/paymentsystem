@@ -6,28 +6,28 @@ module Api
       skip_before_action :verify_authenticity_token
 
       rescue_from ActionController::BadRequest, ArgumentError do |e|
-        formatter = Formatters::FormatterFactory.for_request(request)
+        formatter = Formatters::Factory.for_request(request)
         render body: formatter.serialize_error(e.message),
                status: :bad_request,
                content_type: formatter.content_type
       end
 
       rescue_from Transactions::Validator::ValidationError do |e|
-        formatter = Formatters::FormatterFactory.for_request(request)
+        formatter = Formatters::Factory.for_request(request)
         render body: formatter.serialize_error(e.errors),
                status: :bad_request,
                content_type: formatter.content_type
       end
 
       rescue_from ActiveRecord::RecordInvalid do |e|
-        formatter = Formatters::FormatterFactory.for_request(request)
+        formatter = Formatters::Factory.for_request(request)
         render body: formatter.serialize_error(e.record.errors),
                status: :unprocessable_entity,
                content_type: formatter.content_type
       end
 
       def create
-        formatter = Formatters::FormatterFactory.for_request(request)
+        formatter = Formatters::Factory.for_request(request)
         parsed_data = formatter.parse(request.body.read)
         external_params = extract_params(parsed_data)
 

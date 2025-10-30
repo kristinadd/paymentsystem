@@ -1,36 +1,36 @@
 require "rails_helper"
 
-RSpec.describe Formatters::FormatterFactory do
+RSpec.describe Formatters::Factory do
   describe ".for_request" do
     let(:request) { double("request") }
 
     context "with application/json content type" do
-      it "returns JsonFormatter" do
+      it "returns Json" do
         allow(request).to receive(:content_type).and_return("application/json")
 
         formatter = described_class.for_request(request)
 
-        expect(formatter).to be_a(Formatters::JsonFormatter)
+        expect(formatter).to be_a(Formatters::Json)
       end
     end
 
     context "with application/xml content type" do
-      it "returns XmlFormatter" do
+      it "returns Xml" do
         allow(request).to receive(:content_type).and_return("application/xml")
 
         formatter = described_class.for_request(request)
 
-        expect(formatter).to be_a(Formatters::XmlFormatter)
+        expect(formatter).to be_a(Formatters::Xml)
       end
     end
 
     context "with text/xml content type" do
-      it "returns XmlFormatter" do
+      it "returns Xml" do
         allow(request).to receive(:content_type).and_return("text/xml")
 
         formatter = described_class.for_request(request)
 
-        expect(formatter).to be_a(Formatters::XmlFormatter)
+        expect(formatter).to be_a(Formatters::Xml)
       end
     end
 
@@ -55,18 +55,18 @@ RSpec.describe Formatters::FormatterFactory do
 
   describe ".for_content_type" do
     context "with application/json" do
-      it "returns JsonFormatter" do
+      it "returns Json" do
         formatter = described_class.for_content_type("application/json")
 
-        expect(formatter).to be_a(Formatters::JsonFormatter)
+        expect(formatter).to be_a(Formatters::Json)
       end
     end
 
     context "with application/xml" do
-      it "returns XmlFormatter" do
+      it "returns Xml" do
         formatter = described_class.for_content_type("application/xml")
 
-        expect(formatter).to be_a(Formatters::XmlFormatter)
+        expect(formatter).to be_a(Formatters::Xml)
       end
     end
 

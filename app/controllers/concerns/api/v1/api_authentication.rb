@@ -39,12 +39,12 @@ module Api
         auth_header.gsub(/^Bearer\s+/, "").strip
       end
 
-      def render_unauthorized(message)
-        formatter = Formatters::FormatterFactory.for_request(request)
-        render body: formatter.serialize_error(message),
-               status: :unauthorized,
-               content_type: formatter.content_type
-      end
+        def render_unauthorized(message)
+          formatter = Formatters::Factory.for_request(request)
+          render body: formatter.serialize_error(message),
+                 status: :unauthorized,
+                 content_type: formatter.content_type
+        end
     end
   end
 end

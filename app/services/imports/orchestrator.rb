@@ -1,6 +1,6 @@
 require "csv"
 
-class Imports::ImportUsersAndMerchantsOrchestrator
+class Imports::Orchestrator
   attr_reader :file_path, :results
 
   def initialize(file_path)
@@ -67,7 +67,7 @@ class Imports::ImportUsersAndMerchantsOrchestrator
   end
 
   def import_user(row, line_number)
-    user_service = Imports::ImportUserService.new(row)
+    user_service = Imports::UserService.new(row)
     user = user_service.call
 
     if user
@@ -83,7 +83,7 @@ class Imports::ImportUsersAndMerchantsOrchestrator
   def import_merchant(row, user, line_number)
     return unless has_merchant_data?(row)
 
-    merchant_service = Imports::ImportMerchantService.new(row, user)
+    merchant_service = Imports::MerchantService.new(row, user)
     merchant = merchant_service.call
 
     if merchant
