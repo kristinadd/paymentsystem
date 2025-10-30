@@ -47,9 +47,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
   describe "Role-Based Access Control" do
     context "when logged in as Admin" do
       before do
-        visit login_path
-        fill_in "Email Address", with: admin_user.email
-        click_button "Sign In"
+        login_as(admin_user)
       end
 
       scenario "Admin sees all transactions from all merchants" do
@@ -84,9 +82,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
 
     context "when logged in as Merchant" do
       before do
-        visit login_path
-        fill_in "Email Address", with: merchant_user.email
-        click_button "Sign In"
+        login_as(merchant_user)
       end
 
       scenario "Merchant sees only their own transactions" do
@@ -118,9 +114,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
 
   describe "Navigation" do
     before do
-      visit login_path
-      fill_in "Email Address", with: admin_user.email
-      click_button "Sign In"
+      login_as(admin_user)
     end
 
     scenario "User sees navigation bar with user info" do
@@ -148,9 +142,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
 
   describe "Logout Flow" do
     before do
-      visit login_path
-      fill_in "Email Address", with: admin_user.email
-      click_button "Sign In"
+      login_as(admin_user)
     end
 
     scenario "User can log out" do
@@ -192,9 +184,7 @@ RSpec.feature "User Authentication and Transactions", type: :feature do
     end
 
     before do
-      visit login_path
-      fill_in "Email Address", with: merchant_user.email
-      click_button "Sign In"
+      login_as(merchant_user)
     end
 
     scenario "Shows transaction count badge" do
