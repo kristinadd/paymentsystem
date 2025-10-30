@@ -30,7 +30,7 @@ class TransactionSerializer
     when "ReversalTransaction"
       "reversal"
     else
-      raise ArgumentError, "Unknown transaction type: #{@transaction.type}. Must be one of: #{TransactionFactory::TYPES.join(", ")}"
+        raise ArgumentError, "Unknown transaction type: #{@transaction.type}. Must be one of: #{Transactions::Factory::TYPES.join(", ")}"
     end
   end
 end

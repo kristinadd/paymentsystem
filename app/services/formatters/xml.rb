@@ -1,4 +1,4 @@
-class Formatters::XmlFormatter < Formatters::BaseFormatter
+class Formatters::Xml < Formatters::Base
   def parse(request_body)
     parsed = Hash.from_xml(request_body).deep_symbolize_keys
     # Unwrap <request> wrapper if present, otherwise return parsed hash

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Imports::ImportUserService, type: :service do
+RSpec.describe Imports::UserService, type: :service do
   let(:valid_row) do
     {
       "name" => "John Doe",
@@ -12,7 +12,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
   describe '#call' do
     context 'with valid data' do
       it 'creates a user' do
-        service = Imports::ImportUserService.new(valid_row)
+        service = Imports::UserService.new(valid_row)
 
         expect {
           service.call
@@ -20,7 +20,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
       end
 
       it 'returns the created user' do
-        service = Imports::ImportUserService.new(valid_row)
+        service = Imports::UserService.new(valid_row)
         user = service.call
 
         expect(user).to be_a(User)
@@ -34,7 +34,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
     context 'with invalid data' do
       it 'returns nil when user creation fails' do
         invalid_row = valid_row.merge("email" => "invalid-email")
-        service = Imports::ImportUserService.new(invalid_row)
+        service = Imports::UserService.new(invalid_row)
 
         user = service.call
 
@@ -44,7 +44,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
 
       it 'does not create user when email validation fails' do
         invalid_row = valid_row.merge("email" => "not-an-email")
-        service = Imports::ImportUserService.new(invalid_row)
+        service = Imports::UserService.new(invalid_row)
 
         expect {
           service.call
@@ -55,7 +55,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
     context 'with missing required fields' do
       it 'raises error when name is missing' do
         row = valid_row.merge("name" => "")
-        service = Imports::ImportUserService.new(row)
+        service = Imports::UserService.new(row)
 
         expect {
           service.call
@@ -64,7 +64,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
 
       it 'raises error when email is missing' do
         row = valid_row.merge("email" => "")
-        service = Imports::ImportUserService.new(row)
+        service = Imports::UserService.new(row)
 
         expect {
           service.call
@@ -73,7 +73,7 @@ RSpec.describe Imports::ImportUserService, type: :service do
 
       it 'raises error when role is missing' do
         row = valid_row.merge("role" => "")
-        service = Imports::ImportUserService.new(row)
+        service = Imports::UserService.new(row)
 
         expect {
           service.call

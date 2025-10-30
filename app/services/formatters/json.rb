@@ -1,4 +1,4 @@
-class Formatters::JsonFormatter < Formatters::BaseFormatter
+class Formatters::Json < Formatters::Base
   def parse(request_body)
     JSON.parse(request_body).deep_symbolize_keys
   rescue JSON::ParserError => e

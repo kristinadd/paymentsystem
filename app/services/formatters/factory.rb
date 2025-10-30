@@ -1,8 +1,8 @@
-class Formatters::FormatterFactory
+class Formatters::Factory
   FORMATTERS = {
-    "application/json" => Formatters::JsonFormatter,
-    "application/xml" => Formatters::XmlFormatter,
-    "text/xml" => Formatters::XmlFormatter
+    "application/json" => Formatters::Json,
+    "application/xml" => Formatters::Xml,
+    "text/xml" => Formatters::Xml
   }.freeze
 
   def self.for_request(request)

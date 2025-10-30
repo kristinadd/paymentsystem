@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe TransactionValidator do
+RSpec.describe Transactions::Validator do
   let(:merchant) { create(:merchant) }
   let(:valid_params) do
     {
@@ -33,7 +33,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         )
       end
 
@@ -43,7 +43,7 @@ RSpec.describe TransactionValidator do
 
         begin
           validator.validate!
-        rescue TransactionValidator::ValidationError => e
+        rescue Transactions::Validator::ValidationError => e
           expect(e.errors[:type]).to eq("Type is required")
         end
       end
@@ -55,7 +55,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         )
       end
 
@@ -65,7 +65,7 @@ RSpec.describe TransactionValidator do
 
         begin
           validator.validate!
-        rescue TransactionValidator::ValidationError => e
+        rescue Transactions::Validator::ValidationError => e
           expect(e.errors[:type]).to include("Invalid transaction type")
         end
       end
@@ -77,7 +77,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         )
       end
 
@@ -87,7 +87,7 @@ RSpec.describe TransactionValidator do
 
         begin
           validator.validate!
-        rescue TransactionValidator::ValidationError => e
+        rescue Transactions::Validator::ValidationError => e
           expect(e.errors[:merchant_id]).to eq("Merchant ID is required")
         end
       end
@@ -99,7 +99,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         )
       end
 
@@ -109,7 +109,7 @@ RSpec.describe TransactionValidator do
 
         begin
           validator.validate!
-        rescue TransactionValidator::ValidationError => e
+        rescue Transactions::Validator::ValidationError => e
           expect(e.errors[:merchant_id]).to eq("Merchant not found")
         end
       end
@@ -122,7 +122,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:merchant_id]).to eq("Merchant is not active")
         end
@@ -135,7 +135,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:amount]).to eq("Amount is required")
         end
@@ -155,7 +155,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:amount]).to eq("Amount must be greater than 0")
         end
@@ -166,7 +166,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:amount]).to eq("Amount must be greater than 0")
         end
@@ -179,7 +179,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:customer_email]).to eq("Customer email is required")
         end
@@ -192,7 +192,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:customer_email]).to eq("Customer email is invalid")
         end
@@ -205,7 +205,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:customer_phone]).to eq("Customer phone is invalid")
         end
@@ -216,7 +216,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:customer_phone]).to eq("Customer phone is invalid")
         end
@@ -236,7 +236,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors[:status]).to include("Invalid status")
         end
@@ -255,7 +255,7 @@ RSpec.describe TransactionValidator do
         validator = described_class.new(params)
 
         expect { validator.validate! }.to raise_error(
-          TransactionValidator::ValidationError
+          Transactions::Validator::ValidationError
         ) do |error|
           expect(error.errors).to include(
             type: include("Invalid transaction type"),

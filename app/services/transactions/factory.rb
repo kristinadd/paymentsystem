@@ -1,4 +1,4 @@
-class TransactionFactory
+class Transactions::Factory
   TYPES = [ "authorize", "charge", "refund", "reversal" ].freeze
 
   def self.create(type:, **attributes)
