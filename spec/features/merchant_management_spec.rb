@@ -161,4 +161,76 @@ RSpec.feature "Merchant Management", type: :feature do
       expect(page).to have_content("No merchants found")
     end
   end
+
+  describe "Delete Merchant" do
+    context "when logged in as Admin" do
+      before do
+        login_as(admin_user)
+      end
+
+      scenario "Admin can delete a merchant" do
+        visit merchants_path
+
+        within("tr", text: merchant.name) do
+          click_button "Delete"
+        end
+
+        expect(page).to have_current_path(merchants_path)
+        expect(page).to have_content("Merchant '#{merchant.name}' was successfully deleted")
+
+        # Merchant should not appear in the table
+        within("table") do
+          expect(page).not_to have_content(merchant.name)
+        end
+      end
+
+      scenario "Admin sees delete buttons for all merchants" do
+        visit merchants_path
+
+        within("table") do
+          expect(page).to have_button("Delete", count: Merchant.count)
+        end
+      end
+
+      scenario "Cannot delete merchant with transactions" do
+        merchant_with_txn = create(:merchant, name: "Shop with Transactions")
+        create(:authorize_transaction, merchant: merchant_with_txn, customer_email: "test@example.com")
+
+        visit merchants_path
+
+        within("tr", text: merchant_with_txn.name) do
+          click_button "Delete"
+        end
+
+        expect(page).to have_content("Cannot delete merchant")
+        expect(page).to have_content(merchant_with_txn.name)
+      end
+    end
+
+    context "when logged in as Merchant" do
+      before do
+        login_as(merchant_user)
+      end
+
+      scenario "Merchant can delete their own merchant account" do
+        visit merchants_path
+
+        within("tr", text: merchant.name) do
+          click_button "Delete"
+        end
+
+        expect(page).to have_current_path(merchants_path)
+        expect(page).to have_content("Merchant '#{merchant.name}' was successfully deleted")
+        expect(page).to have_content("No merchants found")
+      end
+
+      scenario "Merchant cannot delete other merchants" do
+        visit merchants_path
+
+        # Should only see their own merchant
+        expect(page).to have_button("Delete", count: 1)
+        expect(page).not_to have_content(other_merchant.name)
+      end
+    end
+  end
 end

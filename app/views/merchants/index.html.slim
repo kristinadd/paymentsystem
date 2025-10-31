@@ -26,6 +26,7 @@
                   th Status
                   th Total Transaction Sum
                   th Created At
+                  th Actions
               tbody
                 - if @merchants.any?
                   - @merchants.each do |merchant|
@@ -48,9 +49,11 @@
                         strong= number_to_currency(merchant.total_transaction_sum || 0)
                       td
                         = merchant.created_at.strftime("%Y-%m-%d %H:%M")
+                      td
+                        = button_to "Delete", merchant_path(merchant), method: :delete, class: "btn btn-danger btn-sm", data: { confirm: "Are you sure you want to delete '#{merchant.name}'? This action cannot be undone." }
                 - else
                   tr
-                    td.text-center.text-muted colspan="6"
+                    td.text-center.text-muted colspan="7"
                       .py-5
                         i.bi.bi-inbox.fs-1
                         p.mt-3 No merchants found

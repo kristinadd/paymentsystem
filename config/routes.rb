@@ -23,7 +23,7 @@ Rails.application.routes.draw do
 
   # Web UI routes
   resources :transactions, only: [ :index ]
-  resources :merchants, only: [ :index ]
+  resources :merchants, only: [ :index, :destroy ]
 
   # Defines the root path route ("/")
   root "transactions#index"
