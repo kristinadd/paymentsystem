@@ -33,6 +33,9 @@ html
         .container-fluid
           a.navbar-brand href="/"
             | Payment System
+          .navbar-nav.me-auto
+            = link_to "Transactions", transactions_path, class: "nav-link text-light"
+            = link_to "Merchants", merchants_path, class: "nav-link text-light"
           .navbar-nav.ms-auto
             .navbar-text.text-light.me-3
               strong= current_user.name

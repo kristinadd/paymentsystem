@@ -26,6 +26,16 @@ class User < ApplicationRecord
     end
   end
 
+  def accessible_merchants
+    if admin?
+      Merchant.all
+    elsif merchant? && merchant.present?
+      Merchant.where(id: merchant.id)
+    else
+      Merchant.none
+    end
+  end
+
   private
 
   def normalize_email

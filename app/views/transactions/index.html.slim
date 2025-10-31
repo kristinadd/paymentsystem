@@ -9,8 +9,7 @@
           - else
             p.text-muted.mb-0 Viewing your transactions
         span.badge.bg-primary.fs-5
-          = @transactions.count
-          |  transactions
+          = pluralize(@transactions.count, 'transaction')
   
   .row
     .col-12
