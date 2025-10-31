@@ -1,0 +1,9 @@
+- if model.errors.any?
+  .alert.alert-danger role="alert"
+    h5.alert-heading
+      = pluralize(model.errors.count, "error")
+      |  prohibited this #{model.model_name.human.downcase} from being saved:
+    ul.mb-0
+      - model.errors.full_messages.each do |message|
+        li= message
+
