@@ -4,14 +4,13 @@ A Ruby on Rails payment processing system with transaction management, merchant 
 
 ## 📋 Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [API Usage](#api-usage)
-- [Transaction Logic](#transaction-logic)
-- [Architecture](#architecture)
-- [Testing](#testing)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Getting Started](#-getting-started)
+- [Usage](#-usage)
+- [Transaction Logic](#-transaction-logic)
+- [Architecture](#️-architecture)
+- [Testing](#-testing)
 
 ---
 
