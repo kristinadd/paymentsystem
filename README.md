@@ -8,7 +8,7 @@ A Ruby on Rails payment processing system with transaction management, merchant 
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [API Documentation](#api-documentation)
+- [API Usage](#api-usage)
 - [Transaction Logic](#transaction-logic)
 - [Architecture](#architecture)
 - [Testing](#testing)
