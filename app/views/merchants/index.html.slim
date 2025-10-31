@@ -9,8 +9,7 @@
           - else
             p.text-muted.mb-0 Your merchant account
         span.badge.bg-primary.fs-5
-          = @merchants.count
-          |  #{@merchants.count == 1 ? 'merchant' : 'merchants'}
+          = pluralize(@merchants.count, 'merchant')
   
   .row
     .col-12
