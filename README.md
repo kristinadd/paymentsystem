@@ -365,9 +365,6 @@ docker-compose exec -T web bundle exec rubocop -a
 ---
 
 ### Background Jobs
-```bash
-
 # Run cleanup job manually
 docker-compose exec web bin/rails runner "TransactionCleanupJob.perform_now"
-```
 
