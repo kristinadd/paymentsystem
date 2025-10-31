@@ -298,12 +298,14 @@ RSpec.feature "Merchant Management", type: :feature do
         expect(page).to have_current_path(edit_merchant_path(merchant))
 
         fill_in "Merchant Name", with: "My Updated Shop"
+        fill_in "Email Address", with: "my-updated-shop@example.com"
         fill_in "Description", with: "New and improved"
         click_button "Update Merchant"
 
         expect(page).to have_current_path(merchants_path)
         expect(page).to have_content("Merchant 'My Updated Shop' was successfully updated")
         expect(page).to have_content("My Updated Shop")
+        expect(page).to have_content("my-updated-shop@example.com")
         expect(page).to have_content("New and improved")
       end
 

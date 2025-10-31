@@ -6,14 +6,7 @@
           h3.mb-0 Edit Merchant
         .card-body.p-4
           = form_with model: @merchant, url: merchant_path(@merchant), method: :patch, local: true do |f|
-            - if @merchant.errors.any?
-              .alert.alert-danger role="alert"
-                h5.alert-heading
-                  = pluralize(@merchant.errors.count, "error")
-                  |  prohibited this merchant from being saved:
-                ul.mb-0
-                  - @merchant.errors.full_messages.each do |message|
-                    li= message
+            = render 'shared/errors', model: @merchant
             
             .mb-3
               = f.label :name, "Merchant Name", class: "form-label"
