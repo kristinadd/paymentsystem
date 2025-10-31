@@ -49,7 +49,9 @@
                       td
                         = merchant.created_at.strftime("%Y-%m-%d %H:%M")
                       td
-                        = button_to "Delete", merchant_path(merchant), method: :delete, class: "btn btn-danger btn-sm", data: { confirm: "Are you sure you want to delete '#{merchant.name}'? This action cannot be undone." }
+                        .d-flex.gap-2
+                          = link_to "Edit", edit_merchant_path(merchant), class: "btn btn-warning btn-sm"
+                          = button_to "Delete", merchant_path(merchant), method: :delete, class: "btn btn-danger btn-sm", data: { confirm: "Are you sure you want to delete '#{merchant.name}'? This action cannot be undone." }
                 - else
                   tr
                     td.text-center.text-muted colspan="7"

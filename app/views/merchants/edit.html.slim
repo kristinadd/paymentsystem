@@ -1,0 +1,35 @@
+.container.mt-5
+  .row.justify-content-center
+    .col-md-8.col-lg-6
+      .card.shadow
+        .card-header.bg-primary.text-white
+          h3.mb-0 Edit Merchant
+        .card-body.p-4
+          = form_with model: @merchant, url: merchant_path(@merchant), method: :patch, local: true do |f|
+            - if @merchant.errors.any?
+              .alert.alert-danger role="alert"
+                h5.alert-heading
+                  = pluralize(@merchant.errors.count, "error")
+                  |  prohibited this merchant from being saved:
+                ul.mb-0
+                  - @merchant.errors.full_messages.each do |message|
+                    li= message
+            
+            .mb-3
+              = f.label :name, "Merchant Name", class: "form-label"
+              = f.text_field :name, class: "form-control", placeholder: "Enter merchant name", required: true, autofocus: true
+            
+            .mb-3
+              = f.label :email, "Email Address", class: "form-label"
+              = f.email_field :email, class: "form-control", placeholder: "merchant@example.com", required: true
+              small.form-text.text-muted Must be unique across all merchants
+            
+            .mb-3
+              = f.label :description, "Description", class: "form-label"
+              = f.text_area :description, class: "form-control", rows: 4, placeholder: "Enter merchant description (optional)"
+              small.form-text.text-muted Optional - Describe what this merchant does
+            
+            .d-flex.gap-2.justify-content-end
+              = link_to "Cancel", merchants_path, class: "btn btn-secondary"
+              = f.submit "Update Merchant", class: "btn btn-primary"
+
