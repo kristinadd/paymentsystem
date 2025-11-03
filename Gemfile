@@ -87,7 +87,7 @@ group :test do
   gem "selenium-webdriver"
 
   # Shoulda Matchers for cleaner RSpec tests [https://github.com/thoughtbot/shoulda-matchers]
-  gem "shoulda-matchers", "~> 6.0"
+  gem "shoulda-matchers", "~> 7.0"
 
   # Database Cleaner for clean test database state [https://github.com/DatabaseCleaner/database_cleaner]
   gem "database_cleaner-active_record", "~> 2.1"
